@@ -1,0 +1,5 @@
+{
+  "name": "File Hash Integrity Checker - DP - PUSFID 2025",
+  "description": "A web-based tool to verify file integrity by comparing cryptographic hashes. Users can either compare two files directly or compare a file against a known hash string, using algorithms like SHA-256, SHA-1, and SHA-512.",
+  "requestFramePermissions": []
+}
