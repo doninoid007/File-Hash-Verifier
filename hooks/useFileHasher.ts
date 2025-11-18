@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ComparisonMode, HashAlgorithm, Report, ReportOptions, FileDetails, ExifData, ReportFormat } from '../types';
 import { calculateFileHash } from '../services/cryptoService';
 import { extractExifData } from '../services/exifService';
@@ -27,6 +27,16 @@ export const useFileHasher = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [report, setReport] = useState<Report | null>(null);
+    const [compatibilityError, setCompatibilityError] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Check for browser compatibility
+        if (!window.crypto || !window.crypto.subtle) {
+            setCompatibilityError("Your browser does not support the Web Crypto API. Please use a modern browser (Chrome, Firefox, Edge, Safari).");
+        } else if (!window.Worker) {
+            setCompatibilityError("Your browser does not support Web Workers, which are required for background processing. Please use a modern browser.");
+        }
+    }, []);
 
     const resetState = () => {
         setFile1(null);
@@ -109,6 +119,11 @@ export const useFileHasher = () => {
         setError(null);
         setReport(null);
 
+        if (compatibilityError) {
+            setError(compatibilityError);
+            return;
+        }
+
         if (!file1) {
             setError("Please select a source file.");
             return;
@@ -155,7 +170,7 @@ export const useFileHasher = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [file1, file2, targetHash, mode, algorithm]);
+    }, [file1, file2, targetHash, mode, algorithm, compatibilityError]);
 
     const handleReset = () => {
         resetState();
@@ -384,6 +399,7 @@ export const useFileHasher = () => {
         handleCompare,
         handleReset,
         handleGenerateAndDownloadReport,
-        formatFileSize
+        formatFileSize,
+        compatibilityError
     };
 };

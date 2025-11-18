@@ -6,6 +6,7 @@ import { ReportDisplay } from './components/ReportDisplay';
 import { XCircleIcon } from './components/icons/XCircleIcon';
 import { UploadIcon } from './components/icons/UploadIcon';
 import { ArrowPathIcon } from './components/icons/ArrowPathIcon';
+import { ExclamationTriangleIcon } from './components/icons/ExclamationTriangleIcon';
 import ReportModal from './components/ReportModal';
 
 const App: React.FC = () => {
@@ -21,7 +22,8 @@ const App: React.FC = () => {
         handleCompare,
         handleReset,
         handleGenerateAndDownloadReport,
-        formatFileSize
+        formatFileSize,
+        compatibilityError
     } = useFileHasher();
 
     const [isDraggingFile1, setIsDraggingFile1] = useState<boolean>(false);
@@ -43,6 +45,18 @@ const App: React.FC = () => {
             fileSetter(droppedFile);
         }
     };
+
+    if (compatibilityError) {
+        return (
+            <div className="bg-slate-900 text-slate-300 min-h-screen flex items-center justify-center p-8 text-center">
+                <div className="max-w-lg bg-slate-800 p-8 rounded-lg border border-red-500/50 shadow-2xl">
+                    <XCircleIcon className="h-16 w-16 text-red-500 mx-auto mb-4" />
+                    <h1 className="text-2xl font-bold text-white mb-4">Browser Incompatible</h1>
+                    <p className="text-lg">{compatibilityError}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-slate-900 text-slate-300 min-h-screen font-sans flex flex-col items-center p-4 sm:p-8 transition-colors duration-500">
@@ -90,6 +104,13 @@ const App: React.FC = () => {
                             </select>
                         </div>
                     </div>
+                    
+                    {(algorithm === 'MD5' || algorithm === 'SHA-1') && (
+                        <div className="mb-6 flex items-start gap-3 bg-yellow-900/20 border border-yellow-600/30 p-3 rounded-md text-yellow-200/80 text-sm">
+                             <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                             <p><strong>Warning:</strong> {algorithm} is considered cryptographically broken and should only be used for simple integrity checks, not for security verification.</p>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                         {/* Source File Input */}
@@ -160,6 +181,10 @@ const App: React.FC = () => {
                             </div>
                         )}
                     </div>
+                    
+                    <p className="text-xs text-slate-500 mt-3 text-center">
+                        Note: Processing happens locally. Large files may take longer depending on available RAM.
+                    </p>
 
                     <div className="mt-6 flex items-center gap-4">
                         <button
@@ -196,7 +221,7 @@ const App: React.FC = () => {
                     )}
                     {report && <ReportDisplay report={report} onGenerateReport={() => setIsReportModalOpen(true)} />}
                 </div>
-
+                
                 <ReportModal
                     isOpen={isReportModalOpen}
                     onClose={() => setIsReportModalOpen(false)}
@@ -213,3 +238,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+    
